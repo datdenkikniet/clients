@@ -63,7 +63,6 @@ describe("DomQueryService", () => {
 
       const formFieldElements = domQueryService.query(
         shadowRoot,
-        "input",
         (element: Element) => element.tagName === "INPUT",
         mutationObserver,
       );
@@ -86,7 +85,6 @@ describe("DomQueryService", () => {
 
       const formFieldElements = domQueryService.query(
         shadowRoot1,
-        "input",
         (element: Element) => element.tagName === "INPUT",
         mutationObserver,
       );
@@ -118,7 +116,7 @@ describe("DomQueryService", () => {
         .fn()
         .mockImplementation(() => (element: Element) => element.tagName === "INPUT");
 
-      domQueryService.query(shadowRoot1, "input", treeWalkerCallback, mutationObserver);
+      domQueryService.query(shadowRoot1, treeWalkerCallback, mutationObserver);
 
       expect(treeWalkerCallback).toHaveBeenCalled();
     });
@@ -140,7 +138,6 @@ describe("DomQueryService", () => {
 
       const formFieldElements = domQueryService.query(
         shadowRoot1,
-        "input",
         (element: Element) => element.tagName === "INPUT",
         mutationObserver,
       );

@@ -81,7 +81,6 @@ export class CollectAutofillContentService implements CollectAutofillContentServ
   private mutationBurstCount = 0;
   private readonly mutationCooldownMs = 500;
   private readonly maxMutationWaitMs = 5000;
-  private readonly formFieldQueryString;
   private readonly nonInputFormFieldTags = new Set(["textarea", "select"]);
   private readonly ignoredInputTypes = new Set([
     "hidden",
@@ -106,12 +105,6 @@ export class CollectAutofillContentService implements CollectAutofillContentServ
     private domQueryService: DomQueryService,
     private autofillOverlayContentService?: AutofillOverlayContentService,
   ) {
-    let inputQuery = "input:not([data-bwignore])";
-    for (const type of this.ignoredInputTypes) {
-      inputQuery += `:not([type="${type}"])`;
-    }
-    this.formFieldQueryString = `${inputQuery}, textarea:not([data-bwignore]), select:not([data-bwignore]), span[data-bwautofill]`;
-
     this.mutationObserver = new MutationObserver(this.handleMutationObserverMutation);
     this.intersectionObserver = new IntersectionObserver(this.handleFormElementIntersection, {
       root: null,
@@ -710,7 +703,6 @@ export class CollectAutofillContentService implements CollectAutofillContentServ
     if (!formFieldElements) {
       formFieldElements = this.domQueryService.query<FormFieldElement>(
         globalThis.document.documentElement,
-        this.formFieldQueryString,
         (node: Node) => this.isNodeFormFieldElement(node),
         this.mutationObserver,
       );
@@ -1325,7 +1317,6 @@ export class CollectAutofillContentService implements CollectAutofillContentServ
 
     const queriedElements = this.domQueryService.query<HTMLElement>(
       globalThis.document.documentElement,
-      `form, ${this.formFieldQueryString}`,
       (node: Node) => {
         if (nodeIsFormElement(node)) {
           formElements.push(node);
@@ -2012,7 +2003,6 @@ export class CollectAutofillContentService implements CollectAutofillContentServ
     return (
       this.domQueryService.query<HTMLInputElement>(
         globalThis.document.documentElement,
-        `input[type="password"]`,
         (node: Node) => nodeIsInputElement(node) && node.type === "password",
       )?.length > 0
     );

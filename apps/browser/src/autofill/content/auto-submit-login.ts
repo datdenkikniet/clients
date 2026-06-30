@@ -194,20 +194,16 @@ import { getSubmitButtonKeywordsSet } from "../utils/qualification";
     element: HTMLElement,
     lastFieldIsPasswordInput = false,
   ): boolean {
-    const genericSubmitElement = querySubmitButtonElement(
-      element,
-      "[type='submit']",
-      (node: Node) => nodeIsTypeSubmitElement(node),
+    const genericSubmitElement = querySubmitButtonElement(element, (node: Node) =>
+      nodeIsTypeSubmitElement(node),
     );
     if (genericSubmitElement) {
       clickSubmitElement(genericSubmitElement, lastFieldIsPasswordInput);
       return true;
     }
 
-    const buttonElement = querySubmitButtonElement(
-      element,
-      "button, [type='button']",
-      (node: Node) => nodeIsButtonElement(node),
+    const buttonElement = querySubmitButtonElement(element, (node: Node) =>
+      nodeIsButtonElement(node),
     );
     if (buttonElement) {
       clickSubmitElement(buttonElement, lastFieldIsPasswordInput);
@@ -222,17 +218,11 @@ import { getSubmitButtonKeywordsSet } from "../utils/qualification";
    * that indicate a login action, the element is returned.
    *
    * @param element - The element to query for submit buttons
-   * @param selector - The selector to query for submit buttons
    * @param treeWalkerFilter - The callback used to filter treeWalker results
    */
-  function querySubmitButtonElement(
-    element: HTMLElement,
-    selector: string,
-    treeWalkerFilter: CallableFunction,
-  ) {
+  function querySubmitButtonElement(element: HTMLElement, treeWalkerFilter: CallableFunction) {
     const submitButtonElements = domQueryService.query<HTMLButtonElement>(
       element,
-      selector,
       treeWalkerFilter,
     );
     for (let index = 0; index < submitButtonElements.length; index++) {
@@ -293,7 +283,6 @@ import { getSubmitButtonKeywordsSet } from "../utils/qualification";
   function getAutofillFormElements(): HTMLFormElement[] {
     return domQueryService.query<HTMLFormElement>(
       globalContext.document.documentElement,
-      "form",
       (node: Node) => nodeIsFormElement(node),
     );
   }

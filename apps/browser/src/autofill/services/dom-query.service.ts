@@ -60,7 +60,6 @@ export class DomQueryService implements DomQueryServiceInterface {
    */
   query<T>(
     root: Document | ShadowRoot | Element,
-    queryString: string,
     treeWalkerFilter: CallableFunction,
     mutationObserver?: MutationObserver,
     ignoredTreeWalkerNodesOverride?: Set<string>,

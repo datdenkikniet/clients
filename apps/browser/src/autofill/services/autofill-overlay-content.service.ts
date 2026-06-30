@@ -587,26 +587,22 @@ export class AutofillOverlayContentService implements AutofillOverlayContentServ
    * @param element - The element to find the submit button within.
    */
   private async findSubmitButton(element: HTMLElement): Promise<HTMLElement | null> {
-    const genericSubmitElement = await this.querySubmitButtonElement(
-      element,
-      "[type='submit']",
-      (node: Node) => nodeIsTypeSubmitElement(node),
+    const genericSubmitElement = await this.querySubmitButtonElement(element, (node: Node) =>
+      nodeIsTypeSubmitElement(node),
     );
     if (genericSubmitElement) {
       return genericSubmitElement;
     }
 
-    const submitButtonElement = await this.querySubmitButtonElement(
-      element,
-      "button, [type='button']",
-      (node: Node) => nodeIsButtonElement(node),
+    const submitButtonElement = await this.querySubmitButtonElement(element, (node: Node) =>
+      nodeIsButtonElement(node),
     );
     if (submitButtonElement) {
       return submitButtonElement;
     }
 
     // If the submit button is not a traditional button element, check for an anchor element that contains submission keywords.
-    const submitAnchorElement = await this.querySubmitButtonElement(element, "a", (node: Node) =>
+    const submitAnchorElement = await this.querySubmitButtonElement(element, (node: Node) =>
       nodeIsAnchorElement(node),
     );
     if (submitAnchorElement) {
@@ -620,17 +616,11 @@ export class AutofillOverlayContentService implements AutofillOverlayContentServ
    * Queries the provided element for a submit button element using the provided selector.
    *
    * @param element - The element to query for a submit button.
-   * @param selector - The selector to use to query the element for a submit button.
    * @param treeWalkerFilter - The tree walker filter to use when querying the element.
    */
-  private async querySubmitButtonElement(
-    element: HTMLElement,
-    selector: string,
-    treeWalkerFilter: CallableFunction,
-  ) {
+  private async querySubmitButtonElement(element: HTMLElement, treeWalkerFilter: CallableFunction) {
     const submitButtonElements = this.domQueryService.query<HTMLButtonElement>(
       element,
-      selector,
       treeWalkerFilter,
     );
     for (let index = 0; index < submitButtonElements.length; index++) {
