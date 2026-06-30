@@ -56,7 +56,6 @@ export class DomQueryService implements DomQueryServiceInterface {
    * @param queryString - The query string to match elements against
    * @param treeWalkerFilter - The filter callback to use for the treeWalker query
    * @param mutationObserver - The MutationObserver to use for observing shadow roots
-   * @param forceDeepQueryAttempt - Whether to force a deep query attempt
    * @param ignoredTreeWalkerNodesOverride - An optional set of node names to ignore when using the treeWalker strategy
    */
   query<T>(
@@ -64,30 +63,16 @@ export class DomQueryService implements DomQueryServiceInterface {
     queryString: string,
     treeWalkerFilter: CallableFunction,
     mutationObserver?: MutationObserver,
-    forceDeepQueryAttempt?: boolean,
     ignoredTreeWalkerNodesOverride?: Set<string>,
   ): T[] {
     const ignoredTreeWalkerNodes = ignoredTreeWalkerNodesOverride || this.ignoredTreeWalkerNodes;
 
-    if (!forceDeepQueryAttempt) {
-      return this.queryAllTreeWalkerNodes<T>(
-        root,
-        treeWalkerFilter,
-        ignoredTreeWalkerNodes,
-        mutationObserver,
-      );
-    }
-
-    try {
-      return this.deepQueryElements<T>(root, queryString, mutationObserver);
-    } catch {
-      return this.queryAllTreeWalkerNodes<T>(
-        root,
-        treeWalkerFilter,
-        ignoredTreeWalkerNodes,
-        mutationObserver,
-      );
-    }
+    return this.queryAllTreeWalkerNodes<T>(
+      root,
+      treeWalkerFilter,
+      ignoredTreeWalkerNodes,
+      mutationObserver,
+    );
   }
 
   /**
@@ -323,64 +308,6 @@ export class DomQueryService implements DomQueryServiceInterface {
       return;
     }
     globalThis.addEventListener(EVENTS.LOAD, this.updatePageContainsShadowDom);
-  }
-
-  /**
-   * Queries all elements in the DOM that match the given query string.
-   * Also, recursively queries all shadow roots for the element.
-   *
-   * @param root - The root element to start the query from
-   * @param queryString - The query string to match elements against
-   * @param mutationObserver - The MutationObserver to use for observing shadow roots
-   */
-  private deepQueryElements<T>(
-    root: Document | ShadowRoot | Element,
-    queryString: string,
-    mutationObserver?: MutationObserver,
-  ): T[] {
-    let elements = this.queryElements<T>(root, queryString);
-
-    if (!this.pageContainsShadowDom) {
-      return elements;
-    }
-
-    // Re-use the already-discovered shadow roots when possible to avoid the
-    // expensive querySelectorAll("*") + tag-name scan on every call.
-    // FIXME: shadow roots added to the main document after initialization are not
-    // included in this set until `resetObservedShadowRoots()` is called. (i.e.
-    // when the mutation observer is rebuilt)
-    const shadowRoots =
-      this.knownShadowRoots.size > 0
-        ? Array.from(this.knownShadowRoots)
-        : this.recursivelyQueryShadowRoots(root);
-
-    for (let index = 0; index < shadowRoots.length; index++) {
-      const shadowRoot = shadowRoots[index];
-      elements = elements.concat(this.queryElements<T>(shadowRoot, queryString));
-
-      if (mutationObserver) {
-        mutationObserver.observe(shadowRoot, {
-          attributes: true,
-          childList: true,
-          subtree: true,
-        });
-      }
-      this.knownShadowRoots.add(shadowRoot);
-    }
-
-    return elements;
-  }
-
-  /**
-   * Queries the DOM for elements based on the given query string.
-   *
-   * @param root - The root element to start the query from
-   * @param queryString - The query string to match elements against
-   */
-  private queryElements<T>(root: Document | ShadowRoot | Element, queryString: string): T[] {
-    // Avoid a redundant pre-check querySelector — querySelectorAll already
-    // returns an empty NodeList when nothing matches, at no extra cost.
-    return Array.from(root.querySelectorAll(queryString)) as T[];
   }
 
   // No cycle guard — `attachShadow` throws on re-attach, `ShadowRoot.host` is

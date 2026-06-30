@@ -4,7 +4,6 @@ export interface DomQueryService {
     queryString: string,
     treeWalkerFilter: CallableFunction,
     mutationObserver?: MutationObserver,
-    forceDeepQueryAttempt?: boolean,
   ): T[];
   updatePageContainsShadowDom(): boolean;
   checkMutationsInShadowRoots(mutations: MutationRecord[]): boolean;
